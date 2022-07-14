@@ -105,8 +105,6 @@
 		    
                         <li><a href="/archive/">ARCHIVE</a></li>
                     
-                        <li><a href="/about/">ABOUT</a></li>
-                    
 
                     
                 </ul>
@@ -147,171 +145,14 @@
 
 
 
-
-<style type="text/css">
-    header.intro-header {
-        background-image: url('/img/home-bg.jpeg')
-    }
-</style>
-
-<header class="intro-header" >
-
+<header class="intro-header" style="background-image: url('/img/home-bg.jpeg')">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="post-heading">
-                    <div class="tags">
-                        
-                    </div>
-                    <h1></h1>
-                    <h2 class="subheading"></h2>
-                    <span class="meta">
-                        
-                            Posted by 
-                            
-                                    StrawWoo Blog
-                             
-                            on 
-                            Monday, January 1, 0001
-                            
-                                <span id="/about/" class="leancloud_visitors meta_data_item" data-flag-title="">
-    <span class="post-meta-item-icon">
-      <span class="octicon octicon-eye"></span> 
-    </span>
-    <i class="fa fa-eye"></i>
-    <span class="old-visitors-count" style="display: none;"></span>
-    <span class="leancloud-visitors-count"></span>
-</span>
-
-
-
-<script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
-
-<script>
-	AV.initialize("", "");
-</script>
-
-<script type="text/javascript">
-function showTime(Counter) {
-    var query = new AV.Query(Counter);
-    var entries = [];
-    var $visitors = $(".leancloud_visitors");
-
-    $visitors.each(function() {
-        entries.push($(this).attr("id").trim());
-    });
-
-    query.containedIn('url', entries);
-    query.find()
-        .done(function(results) {
-            var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
-            var OLD_COUNT_CONTAINER_REF = '.old-visitors-count';
-
-            
-            
-            
-            
-
-            for (var i = 0; i < results.length; i++) {
-                var item = results[i];
-                var url = item.get('url');
-                var time = item.get('time');
-                var element = document.getElementById(url);
-
-                $(element).find(COUNT_CONTAINER_REF).text(time);
-            }
-            for (var i = 0; i < entries.length; i++) {
-                var url = entries[i];
-                var element = document.getElementById(url);
-                var countSpan = $(element).find(COUNT_CONTAINER_REF);
-                if (countSpan.text() == '') {
-                    var oldCountSpan = $(element).find(OLD_COUNT_CONTAINER_REF).text();
-                    if(oldCountSpan!=''){
-                        countSpan.text(0+parseInt(oldCountSpan));
-                    }else{
-                        countSpan.text(0);          
-                    }
-                }
-            }
-        })
-        .fail(function(object, error) {
-            console.log("Error: " + error.code + " " + error.message);
-        });
-}
-
-function addCount(Counter) {
-    var $visitors = $(".leancloud_visitors");
-    var url = $visitors.attr('id').trim();
-    var title = $visitors.attr('data-flag-title').trim();
-    var query = new AV.Query(Counter);
-
-    query.equalTo("url", url);
-    query.find({
-        success: function(results) {
-            if (results.length > 0) {
-                var counter = results[0];
-                counter.fetchWhenSave(true);
-                counter.increment("time");
-                counter.save(null, {
-                    success: function(counter) {
-                        var $element = $(document.getElementById(url));
-                        $element.find('.leancloud-visitors-count').text(counter.get('time'));
-                    },
-                    error: function(counter, error) {
-                        console.log('Failed to save Visitor num, with error message: ' + error.message);
-                    }
-                });
-            } else {
-                var newcounter = new Counter();
-                 
-                var acl = new AV.ACL();
-                acl.setPublicReadAccess(true);
-                acl.setPublicWriteAccess(true);
-                newcounter.setACL(acl);
-                 
-                newcounter.set("title", title);
-                newcounter.set("url", url);
-                var OLD_COUNT_CONTAINER_REF = '.old-visitors-count';
-                var $element = $(document.getElementById(url));
-                var oldCountSpan = $element.find(OLD_COUNT_CONTAINER_REF).text();
-                if(oldCountSpan!=''){
-                    newcounter.set("time", parseInt(oldCountSpan)+1);
-                }else{
- 	                    newcounter.set("time",  1);
-                }
-                newcounter.save(null, {
-                    success: function(newcounter) {
-                        var $element = $(document.getElementById(url));
-                        $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-                    },
-                    error: function(newcounter, error) {
-                        console.log('Failed to create');
-                    }
-                });
-            }
-        },
-        error: function(error) {
-            console.log('Error:' + error.code + " " + error.message);
-        }
-    });
-}
-$(function() {
-    var Counter = AV.Object.extend("Counter");
-    
-    
-    if ($('.leancloud_visitors').length == 1) {
-        addCount(Counter);
-    } else {
-        showTime(Counter);
-    }
-});
-</script>
-
-                            
-                            
-                            
-                            
-                    </span>
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>StrawWoo Blog </h1>
+                    
+		    <span class="subheading">如果没有自由，一切都是空想</span>
                 </div>
             </div>
         </div>
@@ -324,126 +165,116 @@ $(function() {
 <article>
     <div class="container">
         <div class="row">
-
             
             <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
-                post-container">
-
-                
-                <h2 id="关于我">关于我</h2>
-<blockquote>
-</blockquote>
-<p>Hi，我是陈开鸿，服务网格技术布道者及实践者，<a href="https://cloud.tencent.com/product/tcm">腾讯云</a>工程师，曾担任<a href="https://www.zte.com.cn/">中兴通讯</a>技术专家，Linux 基金会开源项目 <a href="https://www.onap.org/">ONAP</a> 项目 leader，甲骨文中间件高级顾问等。我创建了服务网格开源项目 <a href="https://aeraki.net">Aeraki Mesh</a>（CNCF Sandbox 项目），可以在 Istio 中管理 Dubbo、Thrift、Redis 以及任意私有协议的流量。</p>
+            col-lg-8 col-lg-offset-1
+            col-md-8 col-md-offset-1
+            col-sm-12
+            col-xs-12
+            post-container">
+            
+                <h2 id="about-me">About Me</h2>
+<p>Hi，我是赵化冰，服务网格技术布道者及实践者，<a href="https://cloud.tencent.com/product/tcm">腾讯云</a>工程师，曾担任<a href="https://www.zte.com.cn/">中兴通讯</a>技术专家，Linux 基金会开源项目 <a href="https://www.onap.org/">ONAP</a> 项目 leader，甲骨文中间件高级顾问等。我创建了服务网格开源项目 <a href="https://aeraki.net">Aeraki Mesh</a>（CNCF Sandbox 项目），可以在 Istio 中管理 Dubbo、Thrift、Redis 以及任意私有协议的流量。</p>
 <p>工作联系： <a href="mailto:bearbearxinxiang@163.com">bearbearxinxiang@163.com</a></p>
 
+            
+             
+            
 
-                
-                
-<div class="entry-shang text-center">
+
+
+            
+            </div>
+            
+            
+
+<div class="
+    col-lg-3 col-lg-offset-0
+    col-md-3 col-md-offset-0
+    col-sm-12
+    col-xs-12
+    sidebar-container
+">
     
-	    <p>「真诚赞赏，手留余香」</p>
 	
-	<button class="zs show-zs btn btn-bred">赞赏支持</button>
-</div>
-<div class="zs-modal-bg"></div>
-<div class="zs-modal-box">
-	<div class="zs-modal-head">
-		<button type="button" class="close">×</button>
-		<span class="author"><a href="https://strawwoo.github.io/"><img src="/img/favicon.png" />StrawWoo Blog</a></span>
-        
-	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
-		
- 
-	</div>
-	<div class="zs-modal-body">
-		<div class="zs-modal-btns">
-			<button class="btn btn-blink" data-num="2">2元</button>
-			<button class="btn btn-blink" data-num="5">5元</button>
-			<button class="btn btn-blink" data-num="10">10元</button>
-			<button class="btn btn-blink" data-num="50">50元</button>
-			<button class="btn btn-blink" data-num="100">100元</button>
-			<button class="btn btn-blink" data-num="0">任意金额</button>
-		</div>
-		<div class="zs-modal-pay">
-			<button class="btn btn-bred" id="pay-text">2元</button>
-			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
-			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
-		</div>
-	</div>
-	<div class="zs-modal-footer">
-		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
-		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
-	</div>
-</div>
-<script type="text/javascript" src="/js/reward.js"></script>
-
-                
-
-                
-                <hr>
-                <ul class="pager">
-                    
-                    <li class="previous">
-                        <a href="/archive/" data-toggle="tooltip" data-placement="top" title="Posts Archive">&larr;
-                            Previous Post</a>
-                    </li>
-                    
-                    
+    <section class="visible-md visible-lg">
+	
+        <div class="short-about">
+            
+            <a href="/top/about">
+               <img src="/img/avator-image-QR.jpg" alt="avatar" style="cursor: pointer" />
+            </a>
+            
+            
+                <p>志同道合的朋友们，让我们聚成部落，让部落聚成村庄，让村庄聚成城市</p>
+            
+           
+           <ul class="list-inline">
+               
+               
+               
+               
+               
+               
+               <li>
+                   <a target="_blank" href="/img/avator-image-QR.jpg">
+                       <span class="fa-stack fa-lg">
+                           <i class="fas fa-circle fa-stack-2x"></i>
+                           <i class="fab fa-weixin fa-stack-1x fa-inverse"></i>
+                       </span>
+                   </a>
+               </li>
+               
+               
+               <li>
+                   <a target="_blank" href="https://github.com/strawWoo">
+                       <span class="fa-stack fa-lg">
+                           <i class="fas fa-circle fa-stack-2x"></i>
+                           <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                       </span>
+                   </a>
+               </li>
+               
+               
+               
+               
+               
+               
+            
+            
+               
+               
+               
+               
                 </ul>
-                
-
-                
-
-
-
             </div>
-
+    </section>
+	
+    
+    
+    
+    
+    <section>
+        <hr class="hidden-sm hidden-xs">
+        <h5>FEATURED TAGS</h5>
+        <div class="tags">
             
             
-            <div class="
-                col-lg-2 col-lg-offset-0
-                visible-lg-block
-                sidebar-container
-                catalog-container">
-                <div class="side-catalog">
-                    <hr class="hidden-sm hidden-xs">
-                    <h5>
-                        <a class="catalog-toggle" href="#">CATALOG</a>
-                    </h5>
-                    <ul class="catalog-body"></ul>
-                </div>
-            </div>
+               
+                    <a href="/tags/layer2" title="layer2">
+                        layer2
+                    </a>
+               
             
+        </div>
+    </section>
+    
 
-            
-            <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
-                sidebar-container">
+    
+    
+    
+</div>
 
-                
-                
-                <section>
-                    <hr class="hidden-sm hidden-xs">
-                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
-                    <div class="tags">
-                        
-                        
-                        
-                        <a href="/tags/layer2" title="layer2">
-                            layer2
-                        </a>
-                        
-                        
-                    </div>
-                </section>
-                
-
-                
-                
-            </div>
         </div>
     </div>
 </article>
