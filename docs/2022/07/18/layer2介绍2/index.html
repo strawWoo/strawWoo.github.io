@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="StrawWoo Blog">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://strawwoo.github.io//img/home-bg.jpeg">
+    <meta property="twitter:image" content="https://strawwoo.github.io//img/home-bg.jpeg" />
+    
+
+    
+    <meta name="title" content="从cannon的角度理解Layer2 - 3：代码才是最好的老师" />
+    <meta property="og:title" content="从cannon的角度理解Layer2 - 3：代码才是最好的老师" />
+    <meta property="twitter:title" content="从cannon的角度理解Layer2 - 3：代码才是最好的老师" />
+    
+
+    
+    <meta name="description" content="通过代码我们可以从细节部分了解Optimistic-Rollup的争议处理机制">
+    <meta property="og:description" content="通过代码我们可以从细节部分了解Optimistic-Rollup的争议处理机制" />
+    <meta property="twitter:description" content="通过代码我们可以从细节部分了解Optimistic-Rollup的争议处理机制" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="稻草篮儿, StrawWoo, strawWoo, 稻草篮儿的网络日志, 稻草篮儿的博客, StrawWoo Blog, 博客, 个人网站, 区块链, 互联网, 微服务, Web3.0, 云原生, PaaS, Istio, Kubernetes">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>从cannon的角度理解Layer2 - 3：代码才是最好的老师 | 稻草篮儿的博客 | StrawWoo Blog</title>
+
+    <link rel="canonical" href="/2022/07/18/layer2%E4%BB%8B%E7%BB%8D2/">
+
+    
+    
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hugo-theme-cleanwhite.min.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="https://cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@5.15.1/css/all.css" rel="stylesheet" type="text/css">
+
+    
+    
+
+    
+    <script src="/js/jquery.min.js"></script>
+
+    
+    <script src="/js/bootstrap.min.js"></script>
+
+    
+    <script src="/js/hux-blog.min.js"></script>
+
+    
+    
+
+</head>
+
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">StrawWoo Blog</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">All Posts</a>
+                    </li>
+                    
+                        
+                        <li>
+                            <a href="/categories/blockchain">blockchain</a>
+                        </li>
+                        
+                    
+                    
+		    
+                        <li><a href="/archive/">ARCHIVE</a></li>
+                    
+                        <li><a href="/about/">ABOUT</a></li>
+                    
+
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/2022-07-layer2/background.jpeg')
+    }
+</style>
+
+<header class="intro-header" >
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/layer2" title="layer2">
+                            layer2
+                        </a>
+                        
+                    </div>
+                    <h1>从cannon的角度理解Layer2 - 3：代码才是最好的老师</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        
+                            Posted by 
+                            
+                                陈开鸿
+                             
+                            on 
+                            Thursday, July 14, 2022
+                            
+                                <span id="/2022/07/18/layer2%E4%BB%8B%E7%BB%8D2/" class="leancloud_visitors meta_data_item" data-flag-title="">
+    <span class="post-meta-item-icon">
+      <span class="octicon octicon-eye"></span> 
+    </span>
+    <i class="fa fa-eye"></i>
+    <span class="old-visitors-count" style="display: none;"></span>
+    <span class="leancloud-visitors-count"></span>
+</span>
+
+
+
+<script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+
+<script>
+	AV.initialize("", "");
+</script>
+
+<script type="text/javascript">
+function showTime(Counter) {
+    var query = new AV.Query(Counter);
+    var entries = [];
+    var $visitors = $(".leancloud_visitors");
+
+    $visitors.each(function() {
+        entries.push($(this).attr("id").trim());
+    });
+
+    query.containedIn('url', entries);
+    query.find()
+        .done(function(results) {
+            var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+            var OLD_COUNT_CONTAINER_REF = '.old-visitors-count';
+
+            
+            
+            
+            
+
+            for (var i = 0; i < results.length; i++) {
+                var item = results[i];
+                var url = item.get('url');
+                var time = item.get('time');
+                var element = document.getElementById(url);
+
+                $(element).find(COUNT_CONTAINER_REF).text(time);
+            }
+            for (var i = 0; i < entries.length; i++) {
+                var url = entries[i];
+                var element = document.getElementById(url);
+                var countSpan = $(element).find(COUNT_CONTAINER_REF);
+                if (countSpan.text() == '') {
+                    var oldCountSpan = $(element).find(OLD_COUNT_CONTAINER_REF).text();
+                    if(oldCountSpan!=''){
+                        countSpan.text(0+parseInt(oldCountSpan));
+                    }else{
+                        countSpan.text(0);          
+                    }
+                }
+            }
+        })
+        .fail(function(object, error) {
+            console.log("Error: " + error.code + " " + error.message);
+        });
+}
+
+function addCount(Counter) {
+    var $visitors = $(".leancloud_visitors");
+    var url = $visitors.attr('id').trim();
+    var title = $visitors.attr('data-flag-title').trim();
+    var query = new AV.Query(Counter);
+
+    query.equalTo("url", url);
+    query.find({
+        success: function(results) {
+            if (results.length > 0) {
+                var counter = results[0];
+                counter.fetchWhenSave(true);
+                counter.increment("time");
+                counter.save(null, {
+                    success: function(counter) {
+                        var $element = $(document.getElementById(url));
+                        $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                    },
+                    error: function(counter, error) {
+                        console.log('Failed to save Visitor num, with error message: ' + error.message);
+                    }
+                });
+            } else {
+                var newcounter = new Counter();
+                 
+                var acl = new AV.ACL();
+                acl.setPublicReadAccess(true);
+                acl.setPublicWriteAccess(true);
+                newcounter.setACL(acl);
+                 
+                newcounter.set("title", title);
+                newcounter.set("url", url);
+                var OLD_COUNT_CONTAINER_REF = '.old-visitors-count';
+                var $element = $(document.getElementById(url));
+                var oldCountSpan = $element.find(OLD_COUNT_CONTAINER_REF).text();
+                if(oldCountSpan!=''){
+                    newcounter.set("time", parseInt(oldCountSpan)+1);
+                }else{
+ 	                    newcounter.set("time",  1);
+                }
+                newcounter.save(null, {
+                    success: function(newcounter) {
+                        var $element = $(document.getElementById(url));
+                        $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+                    },
+                    error: function(newcounter, error) {
+                        console.log('Failed to create');
+                    }
+                });
+            }
+        },
+        error: function(error) {
+            console.log('Error:' + error.code + " " + error.message);
+        }
+    });
+}
+$(function() {
+    var Counter = AV.Object.extend("Counter");
+    
+    
+    if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+    } else {
+        showTime(Counter);
+    }
+});
+</script>
+
+                            
+                            
+                            
+                            
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <p>上一次，我们通过一个实际例子梳理了cannon的运行过程，更细节的部分，让我们使用代码的形式进行了解，由于业务流程已经连贯并且完整了，所以，下面的代码部分我将采用知识点的形式进行记录，可能会较为零散，但结合业务进行理解，应该也是轻而易举的</p>
+<h1 id="让我们从项目目录开始入手">让我们从项目目录开始入手</h1>
+<p>在开始了解代码之前，让我们先了解一下cannon的目录结构：</p>
+<ul>
+<li>
+<p>minigeth：是<a href="https://geth.ethereum.org/">Go Ethereum</a>针对cannon进行裁剪后的精简版本</p>
+</li>
+<li>
+<p>mipigo：minigeth是一个golang项目，可以由golang编译器直接编译到MIPS平台上，mipigo的作用，就是编译minigeth后，加入启动参数，并输出为可执行文件</p>
+</li>
+<li>
+<p>unicorn：CPU架构模拟引擎，在cannon中提供了MIPS平台模拟功能</p>
+</li>
+<li>
+<p>mipsevm：将mipigo输出的MIPS平台下的minigeth可执行文件，输入到unicorn引擎中，并通过回调，为unicorn的模拟环境提供数据的加载与输出功能</p>
+</li>
+<li>
+<p>contracts：在EVM中，用solidity模拟了MIPS的操作码运行过程</p>
+<ul>
+<li>Challenge.sol：L1智能合约的API</li>
+<li>MIPS.sol：核心为 <code>function stepPC(bytes32 stateHash, uint32 pc, uint32 nextPC) internal returns (bytes32)</code>，用于在EVM中单步模拟MIPS操作码运行</li>
+<li>MIPSMemory.sol：实现了一颗MPT树，用于映射mipsevm中内存快照的MPT（引用minigeth的MPT），并使用 <code>mapping(bytes32 =&gt; Preimage) public preimage</code>，存储 <code>contracts/Challenge.sol/callWithTrieNodes</code> 方法所提供的链上历史数据（数据原像）</li>
+</ul>
+</li>
+</ul>
+<h1 id="mipsevm">mipsevm</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// mipsevm/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>		mu <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">GetHookedUnicorn</span>(root, ram, <span style="color:#8be9fd;font-style:italic">func</span>(step <span style="color:#8be9fd">int</span>, mu uc.Unicorn, ram <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>)) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> step <span style="color:#ff79c6">==</span> regfault {
+</span></span><span style="display:flex;"><span>				fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;regfault at step %d\n&#34;</span>, step)
+</span></span><span style="display:flex;"><span>				mu.<span style="color:#50fa7b">RegWrite</span>(uc.MIPS_REG_V0, <span style="color:#bd93f9">0xbabababa</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> step <span style="color:#ff79c6">==</span> target {
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">SyncRegs</span>(mu, ram)
+</span></span><span style="display:flex;"><span>				fn <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/checkpoint_%d.json&#34;</span>, root, step)
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteCheckpoint</span>(ram, fn, step)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> step <span style="color:#ff79c6">==</span> target {
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// done
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>					mu.<span style="color:#50fa7b">RegWrite</span>(uc.MIPS_REG_PC, <span style="color:#bd93f9">0x5ead0004</span>)
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			lastStep = step <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// mipsevm/run_unicorn.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>	uc <span style="color:#f1fa8c">&#34;github.com/unicorn-engine/unicorn/bindings/go/unicorn&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">GetHookedUnicorn</span>(root <span style="color:#8be9fd">string</span>, ram <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>), callback <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#8be9fd">int</span>, uc.Unicorn, <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>))) uc.Unicorn {
+</span></span><span style="display:flex;"><span>	mu, err <span style="color:#ff79c6">:=</span> uc.<span style="color:#50fa7b">NewUnicorn</span>(uc.ARCH_MIPS, uc.MODE_32|uc.MODE_BIG_ENDIAN)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(mu.<span style="color:#50fa7b">MemMap</span>(<span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0x80000000</span>))
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> mu
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>我们可以看到，mipsevm通过 <code>import uc &quot;github.com/unicorn-engine/unicorn/bindings/go/unicorn&quot; </code>引入了unicorn的golang sdk，并设置了 （<code>uc.ARCH_MIPS, uc.MODE_32|uc.MODE_BIG_ENDIAN</code>），也就是32位的MIPS架构，并使用了大端模式</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// mipsevm/run_unicorn.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">GetHookedUnicorn</span>(root <span style="color:#8be9fd">string</span>, ram <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>), callback <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#8be9fd">int</span>, uc.Unicorn, <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>))) uc.Unicorn {
+</span></span><span style="display:flex;"><span>	mu, err <span style="color:#ff79c6">:=</span> uc.<span style="color:#50fa7b">NewUnicorn</span>(uc.ARCH_MIPS, uc.MODE_32|uc.MODE_BIG_ENDIAN)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	_, outputfault <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">LookupEnv</span>(<span style="color:#f1fa8c">&#34;OUTPUTFAULT&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	mu.<span style="color:#50fa7b">HookAdd</span>(uc.HOOK_INTR, <span style="color:#8be9fd;font-style:italic">func</span>(mu uc.Unicorn, intno <span style="color:#8be9fd">uint32</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> intno <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">17</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Fatal</span>(<span style="color:#f1fa8c">&#34;invalid interrupt &#34;</span>, intno, <span style="color:#f1fa8c">&#34; at step &#34;</span>, steps)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		syscall_no, _ <span style="color:#ff79c6">:=</span> mu.<span style="color:#50fa7b">RegRead</span>(uc.MIPS_REG_V0)
+</span></span><span style="display:flex;"><span>		v0 <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint64</span>(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> syscall_no <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">4020</span> {
+</span></span><span style="display:flex;"><span>			oracle_hash, _ <span style="color:#ff79c6">:=</span> mu.<span style="color:#50fa7b">MemRead</span>(<span style="color:#bd93f9">0x30001000</span>, <span style="color:#bd93f9">0x20</span>)
+</span></span><span style="display:flex;"><span>			hash <span style="color:#ff79c6">:=</span> common.<span style="color:#50fa7b">BytesToHash</span>(oracle_hash)
+</span></span><span style="display:flex;"><span>			key <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/%s&#34;</span>, root, hash)
+</span></span><span style="display:flex;"><span>			value, err <span style="color:#ff79c6">:=</span> ioutil.<span style="color:#50fa7b">ReadFile</span>(key)
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			tmp <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">byte</span>{<span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>}
+</span></span><span style="display:flex;"><span>			binary.BigEndian.<span style="color:#50fa7b">PutUint32</span>(tmp, <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#8be9fd;font-style:italic">len</span>(value)))
+</span></span><span style="display:flex;"><span>			mu.<span style="color:#50fa7b">MemWrite</span>(<span style="color:#bd93f9">0x31000000</span>, tmp)
+</span></span><span style="display:flex;"><span>			mu.<span style="color:#50fa7b">MemWrite</span>(<span style="color:#bd93f9">0x31000004</span>, value)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">WriteRam</span>(ram, <span style="color:#bd93f9">0x31000000</span>, <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#8be9fd;font-style:italic">len</span>(value)))
+</span></span><span style="display:flex;"><span>			value = <span style="color:#8be9fd;font-style:italic">append</span>(value, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#bd93f9">0</span>); i &lt; ram[<span style="color:#bd93f9">0x31000000</span>]; i <span style="color:#ff79c6">+=</span> <span style="color:#bd93f9">4</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteRam</span>(ram, <span style="color:#bd93f9">0x31000004</span><span style="color:#ff79c6">+</span>i, binary.BigEndian.<span style="color:#50fa7b">Uint32</span>(value[i:i<span style="color:#ff79c6">+</span><span style="color:#bd93f9">4</span>]))
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>	}, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> callback <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		mu.<span style="color:#50fa7b">HookAdd</span>(uc.HOOK_MEM_WRITE, <span style="color:#8be9fd;font-style:italic">func</span>(mu uc.Unicorn, access <span style="color:#8be9fd">int</span>, addr64 <span style="color:#8be9fd">uint64</span>, size <span style="color:#8be9fd">int</span>, value <span style="color:#8be9fd">int64</span>) {
+</span></span><span style="display:flex;"><span>			rt <span style="color:#ff79c6">:=</span> value
+</span></span><span style="display:flex;"><span>			rs <span style="color:#ff79c6">:=</span> addr64 <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">3</span>
+</span></span><span style="display:flex;"><span>			addr <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint32</span>(addr64 <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0xFFFFFFFC</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> outputfault <span style="color:#ff79c6">&amp;&amp;</span> addr <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0x30000804</span> {
+</span></span><span style="display:flex;"><span>				fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;injecting output fault over %x\n&#34;</span>, rt)
+</span></span><span style="display:flex;"><span>				rt = <span style="color:#bd93f9">0xbabababa</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">//fmt.Printf(&#34;%X(%d) = %x (at step %d)\n&#34;, addr, size, value, steps)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>			<span style="color:#ff79c6">if</span> size <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">1</span> {
+</span></span><span style="display:flex;"><span>				mem <span style="color:#ff79c6">:=</span> ram[addr]
+</span></span><span style="display:flex;"><span>				val <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint32</span>((rt <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0xFF</span>) <span style="color:#ff79c6">&lt;&lt;</span> (<span style="color:#bd93f9">24</span> <span style="color:#ff79c6">-</span> (rs<span style="color:#ff79c6">&amp;</span><span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">*</span><span style="color:#bd93f9">8</span>))
+</span></span><span style="display:flex;"><span>				mask <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0xFFFFFFFF</span> ^ <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#bd93f9">0xFF</span><span style="color:#ff79c6">&lt;&lt;</span>(<span style="color:#bd93f9">24</span><span style="color:#ff79c6">-</span>(rs<span style="color:#ff79c6">&amp;</span><span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">*</span><span style="color:#bd93f9">8</span>))
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteRam</span>(ram, <span style="color:#8be9fd;font-style:italic">uint32</span>(addr), (mem<span style="color:#ff79c6">&amp;</span>mask)|val)
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> size <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">2</span> {
+</span></span><span style="display:flex;"><span>				mem <span style="color:#ff79c6">:=</span> ram[addr]
+</span></span><span style="display:flex;"><span>				val <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">uint32</span>((rt <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0xFFFF</span>) <span style="color:#ff79c6">&lt;&lt;</span> (<span style="color:#bd93f9">16</span> <span style="color:#ff79c6">-</span> (rs<span style="color:#ff79c6">&amp;</span><span style="color:#bd93f9">2</span>)<span style="color:#ff79c6">*</span><span style="color:#bd93f9">8</span>))
+</span></span><span style="display:flex;"><span>				mask <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0xFFFFFFFF</span> ^ <span style="color:#8be9fd;font-style:italic">uint32</span>(<span style="color:#bd93f9">0xFFFF</span><span style="color:#ff79c6">&lt;&lt;</span>(<span style="color:#bd93f9">16</span><span style="color:#ff79c6">-</span>(rs<span style="color:#ff79c6">&amp;</span><span style="color:#bd93f9">2</span>)<span style="color:#ff79c6">*</span><span style="color:#bd93f9">8</span>))
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteRam</span>(ram, <span style="color:#8be9fd;font-style:italic">uint32</span>(addr), (mem<span style="color:#ff79c6">&amp;</span>mask)|val)
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> size <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">4</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteRam</span>(ram, <span style="color:#8be9fd;font-style:italic">uint32</span>(addr), <span style="color:#8be9fd;font-style:italic">uint32</span>(rt))
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Fatal</span>(<span style="color:#f1fa8c">&#34;bad size write to ram&#34;</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		}, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0x80000000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		mu.<span style="color:#50fa7b">HookAdd</span>(uc.HOOK_CODE, <span style="color:#8be9fd;font-style:italic">func</span>(mu uc.Unicorn, addr <span style="color:#8be9fd">uint64</span>, size <span style="color:#8be9fd">uint32</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">callback</span>(steps, mu, ram)
+</span></span><span style="display:flex;"><span>			steps <span style="color:#ff79c6">+=</span> <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>		}, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0x80000000</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>unicorn的sdk提供了hook方式，作为模拟引擎与外部交互的通道，mipsevm通过3个hook函数完成了加载、内存映射和单步执行的功能：</p>
+<ul>
+<li>uc.HOOK_INTR：系统中断时的回调，通过读取寄存器uc.MIPS_REG_V0中syscall_no（系统中断码），例如 <code>syscall_no == 4020</code>，会将预生成（minigeth/main.go中会详细介绍）的Preimage（原像，block的历史数据）通过 <code>mu.MemWrite</code> 写入到unicorn引擎的内存中，用于支持minigeth在MIPS中的运行过程（即，重跑L1的交易）</li>
+<li>uc.HOOK_MEM_WRITE：写内存时的回调，将unicorn引擎中的内存状态映射出来，mipsevm使用 <code>ram map[uint32](uint32)</code> 全程记录，可以将ram理解为MIPS的内存状态</li>
+<li>uc.HOOK_CODE：操作码运行的回调，每个操作码运行完毕后都会回调一次，这是mipsevm的单步运行基础</li>
+</ul>
+<p>以上HOOK的注册是OS级别的，就是这个特性支持了cannon与主链的解藕，可以将minigeth替换成其他主链的终端，运行逻辑依然成立</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// mipsevm/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">LoadMappedFileUnicorn</span>(mu, <span style="color:#f1fa8c">&#34;mipigo/minigeth.bin&#34;</span>, ram, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> root <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">WriteCheckpoint</span>(ram, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/golden.json&#34;</span>, basedir), <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>			fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;exiting early without a block number&#34;</span>)
+</span></span><span style="display:flex;"><span>			os.<span style="color:#50fa7b">Exit</span>(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">LoadMappedFileUnicorn</span>(mu, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/input&#34;</span>, root), ram, <span style="color:#bd93f9">0x30000000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		mu.<span style="color:#50fa7b">Start</span>(<span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0x5ead0004</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">SyncRegs</span>(mu, ram)
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// minigeth/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// init secp256k1BytePoints
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	crypto.<span style="color:#50fa7b">S256</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// get inputs
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	inputBytes <span style="color:#ff79c6">:=</span> oracle.<span style="color:#50fa7b">Preimage</span>(oracle.<span style="color:#50fa7b">InputHash</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> inputs [<span style="color:#bd93f9">6</span>]common.Hash
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(inputs); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		inputs[i] = common.<span style="color:#50fa7b">BytesToHash</span>(inputBytes[i<span style="color:#ff79c6">*</span><span style="color:#bd93f9">0x20</span> : i<span style="color:#ff79c6">*</span><span style="color:#bd93f9">0x20</span><span style="color:#ff79c6">+</span><span style="color:#bd93f9">0x20</span>])
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过 <code>LoadMappedFileUnicorn</code> 方法，将mipigo输出的MIPS平台下的miniget可执行文件加载到MIPS内存的开头中，并将预生成的input（minigeth/main.go中会详细介绍）加载到特定位置，由于 <code>mipigo/minigeth.bin</code> 是不跟参数的，所以，<code>minigeth/main.go</code> 在MIPS中运行时是直接从上述代码 <code>crypto.S256 </code>开始的，而 <code>oracle.InputHash()</code> 得到的值，便是刚才加载到特定位置的input值，并且使用 <code>orcal.Preimage()</code>获取Preimage的时候，系统会触发 <code>syscall == 4020</code>，导致Preimage文件被加载到MIPS的内存中</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// mipsevm/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">WriteCheckpoint</span>(ram <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">uint32</span>](<span style="color:#8be9fd">uint32</span>), fn <span style="color:#8be9fd">string</span>, step <span style="color:#8be9fd">int</span>) {
+</span></span><span style="display:flex;"><span>	trieroot <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">RamToTrie</span>(ram)
+</span></span><span style="display:flex;"><span>	dat <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">TrieToJson</span>(trieroot, step)
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#50fa7b">Printf</span>(<span style="color:#f1fa8c">&#34;writing %s len %d with root %s\n&#34;</span>, fn, <span style="color:#8be9fd;font-style:italic">len</span>(dat), trieroot)
+</span></span><span style="display:flex;"><span>	ioutil.<span style="color:#50fa7b">WriteFile</span>(fn, dat, <span style="color:#bd93f9">0644</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> step <span style="color:#ff79c6">==</span> target {
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">SyncRegs</span>(mu, ram)
+</span></span><span style="display:flex;"><span>				fn <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/checkpoint_%d.json&#34;</span>, root, step)
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">WriteCheckpoint</span>(ram, fn, step)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> step <span style="color:#ff79c6">==</span> target {
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// done
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>					mu.<span style="color:#50fa7b">RegWrite</span>(uc.MIPS_REG_PC, <span style="color:#bd93f9">0x5ead0004</span>)
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			lastStep = step <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过uc.HOOK_CODE的HOOK逻辑，mipsevm具备在任何MIPS操作码运行后，输出MIPS内存快照的能力，而输出的快照其实是 <code>ram map[uint32]uint32</code> MPT化后的Json文件</p>
+<h1 id="minigeth">minigeth</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// minigeth/oracle/prefetch.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">PrefetchStorage</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, addr common.Address, skey common.Hash, postProcess <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#8be9fd;font-style:italic">map</span>[common.Hash][]<span style="color:#8be9fd">byte</span>)) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">PrefetchAccount</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, addr common.Address, postProcess <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#8be9fd;font-style:italic">map</span>[common.Hash][]<span style="color:#8be9fd">byte</span>)) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">PrefetchCode</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, addrHash common.Hash) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">prefetchUncles</span>(blockHash common.Hash, uncleHash common.Hash, hasher types.TrieHasher) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">PrefetchBlock</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, startBlock <span style="color:#8be9fd">bool</span>, hasher types.TrieHasher) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">getProofAccount</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, addr common.Address, skey common.Hash, storage <span style="color:#8be9fd">bool</span>) []<span style="color:#8be9fd">string</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">...</span>
+</span></span></code></pre></div><p><code>prefetch.go</code> 中的<code>prefetch*</code>函数可以从远端主链上得到所需要的运行时数据，包括完整block信息、account数据、account验证数据等等，minigeth在重放区块交易时，所使用到的区块历史数据等信息便是依赖 <code>prefetch.go</code> 得到的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// minigeth/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(os.Args) &gt; <span style="color:#bd93f9">1</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		blockNumber, _ <span style="color:#ff79c6">:=</span> strconv.<span style="color:#50fa7b">Atoi</span>(os.Args[<span style="color:#bd93f9">1</span>])
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// TODO: get the chainid
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>		oracle.<span style="color:#50fa7b">SetRoot</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/0_%d&#34;</span>, basedir, blockNumber))
+</span></span><span style="display:flex;"><span>		oracle.<span style="color:#50fa7b">PrefetchBlock</span>(big.<span style="color:#50fa7b">NewInt</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(blockNumber)), <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>)
+</span></span><span style="display:flex;"><span>		oracle.<span style="color:#50fa7b">PrefetchBlock</span>(big.<span style="color:#50fa7b">NewInt</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(blockNumber)<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>), <span style="color:#ff79c6">false</span>, pkwtrie)
+</span></span><span style="display:flex;"><span>		hash, err <span style="color:#ff79c6">:=</span> pkwtrie.<span style="color:#50fa7b">Commit</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#50fa7b">Println</span>(<span style="color:#f1fa8c">&#34;committed transactions&#34;</span>, hash, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// init secp256k1BytePoints
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	crypto.<span style="color:#50fa7b">S256</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// get inputs
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	inputBytes <span style="color:#ff79c6">:=</span> oracle.<span style="color:#50fa7b">Preimage</span>(oracle.<span style="color:#50fa7b">InputHash</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> inputs [<span style="color:#bd93f9">6</span>]common.Hash
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(inputs); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		inputs[i] = common.<span style="color:#50fa7b">BytesToHash</span>(inputBytes[i<span style="color:#ff79c6">*</span><span style="color:#bd93f9">0x20</span> : i<span style="color:#ff79c6">*</span><span style="color:#bd93f9">0x20</span><span style="color:#ff79c6">+</span><span style="color:#bd93f9">0x20</span>])
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// minigeth/oracle/prefetch.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">PrefetchBlock</span>(blockNumber <span style="color:#ff79c6">*</span>big.Int, startBlock <span style="color:#8be9fd">bool</span>, hasher types.TrieHasher) {
+</span></span><span style="display:flex;"><span>	r <span style="color:#ff79c6">:=</span> jsonreq{Jsonrpc: <span style="color:#f1fa8c">&#34;2.0&#34;</span>, Method: <span style="color:#f1fa8c">&#34;eth_getBlockByNumber&#34;</span>, Id: <span style="color:#bd93f9">1</span>}
+</span></span><span style="display:flex;"><span>	r.Params = <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#bd93f9">2</span>)
+</span></span><span style="display:flex;"><span>	r.Params[<span style="color:#bd93f9">0</span>] = fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;0x%x&#34;</span>, blockNumber.<span style="color:#50fa7b">Int64</span>())
+</span></span><span style="display:flex;"><span>	r.Params[<span style="color:#bd93f9">1</span>] = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	jsonData, err <span style="color:#ff79c6">:=</span> json.<span style="color:#50fa7b">Marshal</span>(r)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">/*dat, _ := ioutil.ReadAll(getAPI(jsonData))
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">	fmt.Println(string(dat))*/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	jr <span style="color:#ff79c6">:=</span> jsonrespt{}
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(json.<span style="color:#50fa7b">NewDecoder</span>(<span style="color:#50fa7b">getAPI</span>(jsonData)).<span style="color:#50fa7b">Decode</span>(<span style="color:#ff79c6">&amp;</span>jr))
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//fmt.Println(jr.Result)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	blockHeader <span style="color:#ff79c6">:=</span> jr.Result.<span style="color:#50fa7b">ToHeader</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// put in the start block header
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#ff79c6">if</span> startBlock {
+</span></span><span style="display:flex;"><span>		blockHeaderRlp, err <span style="color:#ff79c6">:=</span> rlp.<span style="color:#50fa7b">EncodeToBytes</span>(<span style="color:#ff79c6">&amp;</span>blockHeader)
+</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">check</span>(err)
+</span></span><span style="display:flex;"><span>		hash <span style="color:#ff79c6">:=</span> crypto.<span style="color:#50fa7b">Keccak256Hash</span>(blockHeaderRlp)
+</span></span><span style="display:flex;"><span>		preimages[hash] = blockHeaderRlp
+</span></span><span style="display:flex;"><span>		emptyHash <span style="color:#ff79c6">:=</span> common.Hash{}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> inputs[<span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">==</span> emptyHash {
+</span></span><span style="display:flex;"><span>			inputs[<span style="color:#bd93f9">0</span>] = hash
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// second block
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#ff79c6">if</span> blockHeader.ParentHash <span style="color:#ff79c6">!=</span> inputs[<span style="color:#bd93f9">0</span>] {
+</span></span><span style="display:flex;"><span>		fmt.<span style="color:#50fa7b">Println</span>(blockHeader.ParentHash, inputs[<span style="color:#bd93f9">0</span>])
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">panic</span>(<span style="color:#f1fa8c">&#34;block transition isn&#39;t correct&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	inputs[<span style="color:#bd93f9">1</span>] = blockHeader.TxHash
+</span></span><span style="display:flex;"><span>	inputs[<span style="color:#bd93f9">2</span>] = blockHeader.Coinbase.<span style="color:#50fa7b">Hash</span>()
+</span></span><span style="display:flex;"><span>	inputs[<span style="color:#bd93f9">3</span>] = blockHeader.UncleHash
+</span></span><span style="display:flex;"><span>	inputs[<span style="color:#bd93f9">4</span>] = common.<span style="color:#50fa7b">BigToHash</span>(big.<span style="color:#50fa7b">NewInt</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(blockHeader.GasLimit)))
+</span></span><span style="display:flex;"><span>	inputs[<span style="color:#bd93f9">5</span>] = common.<span style="color:#50fa7b">BigToHash</span>(big.<span style="color:#50fa7b">NewInt</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(blockHeader.Time)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// save the inputs
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	saveinput <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd">byte</span>, <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; <span style="color:#8be9fd;font-style:italic">len</span>(inputs); i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>		saveinput = <span style="color:#8be9fd;font-style:italic">append</span>(saveinput, inputs[i].<span style="color:#50fa7b">Bytes</span>()[:]<span style="color:#ff79c6">...</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	inputhash = crypto.<span style="color:#50fa7b">Keccak256Hash</span>(saveinput)
+</span></span><span style="display:flex;"><span>	preimages[inputhash] = saveinput
+</span></span><span style="display:flex;"><span>	ioutil.<span style="color:#50fa7b">WriteFile</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/input&#34;</span>, root), inputhash.<span style="color:#50fa7b">Bytes</span>(), <span style="color:#bd93f9">0644</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//ioutil.WriteFile(fmt.Sprintf(&#34;%s/input&#34;, root), saveinput, 0644)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// save the uncles
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#50fa7b">prefetchUncles</span>(blockHeader.<span style="color:#50fa7b">Hash</span>(), blockHeader.UncleHash, hasher)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>我们应该可以理解到，不管是在MIPS平台下，还是在linux平台下，使用历史的blockNumber在minigeth中，运行顺序相同的交易后，所得出的结果都是相同的，所以，cannon在linux平台下预生成了一些文件，作为缓存使用：</p>
+<ul>
+<li>Preimage文件：链上的历史数据，使用<code>prefetch*</code>得到</li>
+<li>input文件：blockHeader的 <code>Keccak256Hash</code>，用于索引一个唯一的block数据</li>
+</ul>
+<p>通过缓存这些数据，minigeth在MIPS下多次运行时，就不必再次远程到链上了</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// minigeth/main.go
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	bc <span style="color:#ff79c6">:=</span> core.<span style="color:#50fa7b">NewBlockChain</span>(<span style="color:#ff79c6">&amp;</span>parent)
+</span></span><span style="display:flex;"><span>	database <span style="color:#ff79c6">:=</span> state.<span style="color:#50fa7b">NewDatabase</span>(parent)
+</span></span><span style="display:flex;"><span>	statedb, _ <span style="color:#ff79c6">:=</span> state.<span style="color:#50fa7b">New</span>(parent.Root, database, <span style="color:#ff79c6">nil</span>)
+</span></span><span style="display:flex;"><span>	vmconfig <span style="color:#ff79c6">:=</span> vm.Config{}
+</span></span><span style="display:flex;"><span>	processor <span style="color:#ff79c6">:=</span> core.<span style="color:#50fa7b">NewStateProcessor</span>(params.MainnetChainConfig, bc, bc.<span style="color:#50fa7b">Engine</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// read txs
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#6272a4">//traverseStackTrie(newheader.TxHash)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//fmt.Println(fn)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#6272a4">//fmt.Println(txTrieRoot)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#8be9fd;font-style:italic">var</span> txs []<span style="color:#ff79c6">*</span>types.Transaction
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	triedb <span style="color:#ff79c6">:=</span> trie.<span style="color:#50fa7b">NewDatabase</span>(parent)
+</span></span><span style="display:flex;"><span>	tt, _ <span style="color:#ff79c6">:=</span> trie.<span style="color:#50fa7b">New</span>(newheader.TxHash, <span style="color:#ff79c6">&amp;</span>triedb)
+</span></span><span style="display:flex;"><span>	tni <span style="color:#ff79c6">:=</span> tt.<span style="color:#50fa7b">NodeIterator</span>([]<span style="color:#8be9fd">byte</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> tni.<span style="color:#50fa7b">Next</span>(<span style="color:#ff79c6">true</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">//fmt.Println(tni.Hash(), tni.Leaf(), tni.Path(), tni.Error())
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>		<span style="color:#ff79c6">if</span> tni.<span style="color:#50fa7b">Leaf</span>() {
+</span></span><span style="display:flex;"><span>			tx <span style="color:#ff79c6">:=</span> types.Transaction{}
+</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">var</span> rlpKey <span style="color:#8be9fd">uint64</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">check</span>(rlp.<span style="color:#50fa7b">DecodeBytes</span>(tni.<span style="color:#50fa7b">LeafKey</span>(), <span style="color:#ff79c6">&amp;</span>rlpKey))
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">check</span>(tx.<span style="color:#50fa7b">UnmarshalBinary</span>(tni.<span style="color:#50fa7b">LeafBlob</span>()))
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// TODO: resize an array in go?
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>			<span style="color:#ff79c6">for</span> <span style="color:#8be9fd;font-style:italic">uint64</span>(<span style="color:#8be9fd;font-style:italic">len</span>(txs)) <span style="color:#ff79c6">&lt;=</span> rlpKey {
+</span></span><span style="display:flex;"><span>				txs = <span style="color:#8be9fd;font-style:italic">append</span>(txs, <span style="color:#ff79c6">nil</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			txs[rlpKey] = <span style="color:#ff79c6">&amp;</span>tx
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> uncles []<span style="color:#ff79c6">*</span>types.Header
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">check</span>(rlp.<span style="color:#50fa7b">DecodeBytes</span>(oracle.<span style="color:#50fa7b">Preimage</span>(newheader.UncleHash), <span style="color:#ff79c6">&amp;</span>uncles))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> receipts []<span style="color:#ff79c6">*</span>types.Receipt
+</span></span><span style="display:flex;"><span>	block <span style="color:#ff79c6">:=</span> types.<span style="color:#50fa7b">NewBlock</span>(<span style="color:#ff79c6">&amp;</span>newheader, txs, uncles, receipts, trie.<span style="color:#50fa7b">NewStackTrie</span>(<span style="color:#ff79c6">nil</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// validateState is more complete, gas used + bloom also
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	receipts, _, _, err <span style="color:#ff79c6">:=</span> processor.<span style="color:#50fa7b">Process</span>(block, statedb, vmconfig)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>minigeth在将blockNumber推进到blockNumber+1之前，会做一些准备：</p>
+<ul>
+<li>使用 <code>database := state.NewDatabase(parent)</code> 构建起运行的数据基线，其内部使用 <code>PrefetchAccount</code></li>
+<li>找出需要重放的交易 <code>var txs []*types.Transaction</code> 并将其封装到block中</li>
+</ul>
+<p>做好准备后，便可以使用 <code>processor.Process</code> 进行交易重放了，如果该过程是在MIPS中进行的，minigeth的运行逻辑最终会被转译为MIPS操作码，从而，其运行过程和数据会被mipsevm的HOOK所捕获</p>
+<h1 id="challengesol">Challenge.sol</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span><span style="color:#6272a4">// contracts/Challenge.sol
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">contract</span> <span style="color:#50fa7b">Challenge</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">struct</span> <span style="color:#50fa7b">ChallengeData</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">uint256</span> L;
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">uint256</span> R;
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">mapping</span>(<span style="color:#8be9fd">uint256</span> <span style="color:#ff79c6">=&gt;</span> <span style="color:#8be9fd">bytes32</span>) assertedState;
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">mapping</span>(<span style="color:#8be9fd">uint256</span> <span style="color:#ff79c6">=&gt;</span> <span style="color:#8be9fd">bytes32</span>) defendedState;
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">address</span> <span style="color:#ff79c6">payable</span> challenger;
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">uint256</span> blockNumberN;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">initiateChallenge</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd">uint</span> blockNumberN, <span style="color:#8be9fd">bytes</span> calldata blockHeaderNp1, <span style="color:#8be9fd">bytes32</span> assertionRoot,
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd">bytes32</span> finalSystemState, <span style="color:#8be9fd">uint256</span> stepCount)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">external</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (<span style="color:#8be9fd">uint256</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    	...
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">callWithTrieNodes</span>(<span style="color:#8be9fd">address</span> target, <span style="color:#8be9fd">bytes</span> calldata dat, <span style="color:#8be9fd">bytes</span>[] calldata nodes) <span style="color:#ff79c6">public</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> (<span style="color:#8be9fd">uint</span> i <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>; i <span style="color:#ff79c6">&lt;</span> nodes.length; i<span style="color:#ff79c6">++</span>) {
+</span></span><span style="display:flex;"><span>      mem.AddTrieNode(nodes[i]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">proposeState</span>(<span style="color:#8be9fd">uint256</span> challengeId, <span style="color:#8be9fd">bytes32</span> stateHash) <span style="color:#ff79c6">external</span> {
+</span></span><span style="display:flex;"><span>    ChallengeData <span style="color:#ff79c6">storage</span> c <span style="color:#ff79c6">=</span> challenges[challengeId];
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">uint256</span> stepNumber <span style="color:#ff79c6">=</span> getStepNumber(challengeId);
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(c.assertedState[stepNumber] <span style="color:#ff79c6">==</span> <span style="color:#8be9fd">bytes32</span>(<span style="color:#bd93f9">0</span>), <span style="color:#f1fa8c">&#34;state already proposed&#34;</span>);
+</span></span><span style="display:flex;"><span>    c.assertedState[stepNumber] <span style="color:#ff79c6">=</span> stateHash;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">respondState</span>(<span style="color:#8be9fd">uint256</span> challengeId, <span style="color:#8be9fd">bytes32</span> stateHash) <span style="color:#ff79c6">external</span> {
+</span></span><span style="display:flex;"><span>    ChallengeData <span style="color:#ff79c6">storage</span> c <span style="color:#ff79c6">=</span> challenges[challengeId];
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">uint256</span> stepNumber <span style="color:#ff79c6">=</span> getStepNumber(challengeId);
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(c.assertedState[stepNumber] <span style="color:#ff79c6">!=</span> <span style="color:#8be9fd">bytes32</span>(<span style="color:#bd93f9">0</span>), <span style="color:#f1fa8c">&#34;challenger state not proposed&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(c.defendedState[stepNumber] <span style="color:#ff79c6">==</span> <span style="color:#8be9fd">bytes32</span>(<span style="color:#bd93f9">0</span>), <span style="color:#f1fa8c">&#34;state already proposed&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    c.defendedState[stepNumber] <span style="color:#ff79c6">=</span> stateHash;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (c.assertedState[stepNumber] <span style="color:#ff79c6">==</span> c.defendedState[stepNumber]) {
+</span></span><span style="display:flex;"><span>      c.L <span style="color:#ff79c6">=</span> stepNumber; <span style="color:#6272a4">// agree
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>      c.R <span style="color:#ff79c6">=</span> stepNumber; <span style="color:#6272a4">// disagree
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">confirmStateTransition</span>(<span style="color:#8be9fd">uint256</span> challengeId) <span style="color:#ff79c6">external</span> {
+</span></span><span style="display:flex;"><span>    ChallengeData <span style="color:#ff79c6">storage</span> c <span style="color:#ff79c6">=</span> challenges[challengeId];
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">bytes32</span> stepState <span style="color:#ff79c6">=</span> mips.Step(c.assertedState[c.L]);
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(stepState <span style="color:#ff79c6">==</span> c.assertedState[c.R], <span style="color:#f1fa8c">&#34;wrong asserted state for challenger&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// pay out bounty!!
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    (<span style="color:#8be9fd">bool</span> sent, ) <span style="color:#ff79c6">=</span> c.challenger.<span style="color:#8be9fd;font-style:italic">call</span>{<span style="color:#8be9fd;font-style:italic">value</span><span style="color:#ff79c6">:</span> <span style="color:#8be9fd">address</span>(<span style="color:#8be9fd;font-style:italic">this</span>).<span style="color:#8be9fd;font-style:italic">balance</span>}(<span style="color:#f1fa8c">&#34;&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(sent, <span style="color:#f1fa8c">&#34;Failed to send Ether&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    emit ChallengerWins(challengeId);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">function</span> <span style="color:#50fa7b">denyStateTransition</span>(<span style="color:#8be9fd">uint256</span> challengeId) <span style="color:#ff79c6">external</span> {
+</span></span><span style="display:flex;"><span>    ChallengeData <span style="color:#ff79c6">storage</span> c <span style="color:#ff79c6">=</span> challenges[challengeId];
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">bytes32</span> stepState <span style="color:#ff79c6">=</span> mips.Step(c.defendedState[c.L]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (c.defendedState[c.R] <span style="color:#ff79c6">==</span> <span style="color:#8be9fd">bytes32</span>(<span style="color:#bd93f9">0</span>)) {
+</span></span><span style="display:flex;"><span>      emit ChallengerLosesByDefault(challengeId);
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">require</span>(stepState <span style="color:#ff79c6">==</span> c.defendedState[c.R], <span style="color:#f1fa8c">&#34;wrong asserted state for defender&#34;</span>);
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Challenge.sol的API设计的清晰明了，在链上的storage上会存储 <code>ChallengeData</code> 数据结构，用于支持后续的一系列挑战过程，这些过程包括：</p>
+<ul>
+<li><code>initiateChallenge</code>：用于Challenger发起挑战，其中会生成 <code>challengeData</code> 以及与其对应的索引Id（ <code>challengeId</code>）</li>
+<li><code>callWithTrieNodes</code>：是一个调用代理，其中dat是真正要调用的方法，而代理的作用是将MIPS的内存快照（<code>bytes[] calldata nodes</code>）加载到 <code>MIPSMemory.sol</code>中，这里需要注意，MIPS的内存快照是很大的（测试时有10MB~30MB），在 <code>scripts/lib.getTrieNodesForCall</code> 看到的思路是用到时加载</li>
+<li><code>proposeState</code> 与 <code>respondState</code>：Challenger与Defender的攻防过程，使用c.L与c.R的二分查找模式，可以最终确定争议的stepNumber</li>
+<li><code>confirmStateTransition</code> 与 <code>denyStateTransition</code>：Challenger与Defender获取仲裁结果的过程，该过程需要调用 <code>callWithTrieNodes</code> 导入MIPS的内存快照后才可以运行，其使用 <code>mips.Step</code> 方法单步生成stepNumber+1的内存快照RootHash，以支持最终的仲裁过程</li>
+</ul>
+<p>上述过程也就是：发起挑战 -&gt; 来回攻防 -&gt; 发现确定争议步骤 -&gt; 做出仲裁</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://strawwoo.github.io/"><img src="/img/favicon.png" />StrawWoo Blog</a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="0">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                
+                <hr>
+                <ul class="pager">
+                    
+                    
+                    <li class="next">
+                        <a href="/2022/07/16/layer2%E4%BB%8B%E7%BB%8D2/" data-toggle="tooltip" data-placement="top" title="从cannon的角度理解Layer2 - 2：cannon登场">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+                
+
+                
+
+
+
+            </div>
+
+            
+            
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+            
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        <a href="/tags/layer2" title="layer2">
+                            layer2
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">                  
+                    
+                    
+                    
+                    
+                    
+
+		            
+                    
+                    <li>
+                        <a target="_blank" href="/img/avator-image-QR.jpg">
+                            <span class="fa-stack fa-lg">
+                                <i class="fas fa-circle fa-stack-2x"></i>
+                                <i class="fab fa-weixin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		            
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/strawWoo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fas fa-circle fa-stack-2x"></i>
+                                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		            
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+            
+            
+            
+           
+             </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; StrawWoo Blog 2022
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function loadAsync(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        loadAsync("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    loadAsync("https://cdn.jsdelivr.net/npm/fastclick@1.0.6/lib/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'strawWoo', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+
+<script type="text/javascript">
+    function generateCatalog(selector) {
+
+        
+        
+        
+        
+            _containerSelector = 'div.post-container'
+        
+
+        
+        var P = $(_containerSelector), a, n, t, l, i, c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+
+        
+        $(selector).html('')
+
+        
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#" + $(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="' + i + '" rel="nofollow">' + t + '</a>');
+            l = $('<li class="' + n + '_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;
+    }
+
+    generateCatalog(".catalog-body");
+
+    
+    $(".catalog-toggle").click((function (e) {
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    
+
+
+    loadAsync("\/js\/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+
+
+
+</body>
+</html>

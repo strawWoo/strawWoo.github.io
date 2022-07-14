@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="" />
-    <meta property="og:title" content="" />
-    <meta property="twitter:title" content="" />
+    <meta name="title" content="从cannon的角度理解Layer2 - 1：前世今生" />
+    <meta property="og:title" content="从cannon的角度理解Layer2 - 1：前世今生" />
+    <meta property="twitter:title" content="从cannon的角度理解Layer2 - 1：前世今生" />
     
 
     
-    <meta name="description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家">
-    <meta property="og:description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家" />
-    <meta property="twitter:description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家" />
+    <meta name="description" content="让我们从layer2的源头讲起，回溯一下layer2的产生、发展和现状">
+    <meta property="og:description" content="让我们从layer2的源头讲起，回溯一下layer2的产生、发展和现状" />
+    <meta property="twitter:description" content="让我们从layer2的源头讲起，回溯一下layer2的产生、发展和现状" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="稻草篮儿, StrawWoo, strawWoo, 稻草篮儿的网络日志, 稻草篮儿的博客, StrawWoo Blog, 博客, 个人网站, 区块链, 互联网, 微服务, Web3.0, 云原生, PaaS, Istio, Kubernetes">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>稻草篮儿的博客 | StrawWoo Blog</title>
+    <title>从cannon的角度理解Layer2 - 1：前世今生 | 稻草篮儿的博客 | StrawWoo Blog</title>
 
-    <link rel="canonical" href="/about/">
+    <link rel="canonical" href="/2022/07/14/layer2%E4%BB%8B%E7%BB%8D1/">
 
     
     
@@ -150,7 +150,7 @@
 
 <style type="text/css">
     header.intro-header {
-        background-image: url('/img/home-bg.jpeg')
+        background-image: url('/img/2022-07-layer2/background.jpeg')
     }
 </style>
 
@@ -162,19 +162,23 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                        <a class="tag" href="/tags/layer2" title="layer2">
+                            layer2
+                        </a>
+                        
                     </div>
-                    <h1></h1>
+                    <h1>从cannon的角度理解Layer2 - 1：前世今生</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         
                             Posted by 
                             
-                                    StrawWoo Blog
+                                陈开鸿
                              
                             on 
-                            Monday, January 1, 0001
+                            Thursday, July 14, 2022
                             
-                                <span id="/about/" class="leancloud_visitors meta_data_item" data-flag-title="">
+                                <span id="/2022/07/14/layer2%E4%BB%8B%E7%BB%8D1/" class="leancloud_visitors meta_data_item" data-flag-title="">
     <span class="post-meta-item-icon">
       <span class="octicon octicon-eye"></span> 
     </span>
@@ -332,11 +336,54 @@ $(function() {
                 post-container">
 
                 
-                <h2 id="关于我">关于我</h2>
-<blockquote>
-</blockquote>
-<p>Hi，我是陈开鸿，服务网格技术布道者及实践者，<a href="https://cloud.tencent.com/product/tcm">腾讯云</a>工程师，曾担任<a href="https://www.zte.com.cn/">中兴通讯</a>技术专家，Linux 基金会开源项目 <a href="https://www.onap.org/">ONAP</a> 项目 leader，甲骨文中间件高级顾问等。我创建了服务网格开源项目 <a href="https://aeraki.net">Aeraki Mesh</a>（CNCF Sandbox 项目），可以在 Istio 中管理 Dubbo、Thrift、Redis 以及任意私有协议的流量。</p>
-<p>工作联系： <a href="mailto:bearbearxinxiang@163.com">bearbearxinxiang@163.com</a></p>
+                <p>今天我们来聊聊区块链的layer2，并通过一个实际的项目（<a href="https://github.com/ethereum-optimism/cannon">cannon</a>），从一个特定角度，看看为什么需要layer2，以及layer2都干了些什么事情</p>
+<p>本篇文章只关注了区块链的一个纵深领域，并没有从头讲起，希望你可以对一些前置知识有所了解：</p>
+<ul>
+<li>以太坊的基本运行<a href="https://academy.binance.com/zh/articles/what-is-ethereum">概念</a></li>
+<li>MPT的基础<a href="https://learnblockchain.cn/books/geth/part3/mpt.html">概念</a></li>
+<li>一些golang<a href="https://go.dev/play/">语法</a></li>
+<li>layer2的基本<a href="https://zhuanlan.zhihu.com/p/342753841">概念</a></li>
+</ul>
+<p>如果你对以上知识并不了解，建议可以阅读上述外联文章后，再行食用</p>
+<h1 id="没有layer2不行吗">没有layer2不行吗？</h1>
+<p>在聊layer2之前，我们应该先简单回溯一下layer2出现的原因，毕竟，要理解一个事物，就要从这个事物的源头开始了解</p>
+<p>众所周知，以太坊是一个建立在区块链方案上的完全去中心化的系统，系统中所有节点以及节点功能，都是以去中心化的思维方式进行设计和实现的，节点与节点间是完全独立、互不相识，也互不信任的，在运行的过程中，以太坊需要维护一套世界范围内统一的账本，这套账本的全量数据，需要存储在每个节点上（全节点[ref]），读到这里，大家可能就有所思考，什么？数以万计的节点居然需要统一的存储一套数据？是的，没错，只有大量的陌生节点都认可了这套数据，这套数据才能具备不可篡改和安全等特性，就如同数学于我们所处的社会一样，社会中陌生人之间是互不相识，也互不信任的，但对于数学和数字，陌生人间也应该大概率是具有相同共识的，并可以依赖数学作为信任基础，而相互交流和相互沟通的，现实中的例子，就比如合同的制定、文档的交流等，当然，如果有个别人硬要说1+1=3，这也并不会影响数学系统在社会中的运行，因为，绝大多数人的共识已经达成了，整体的共识并不会跟随个别人的意见而改变，最后，共识就变成了安全的和不可篡改的了</p>
+<p>这是区块链的逻辑基础，也是架构在区块链之上的以太坊的逻辑基础，总得说来就是：<strong>一旦在大量陌生节点上对数据达成共识后，数据就变得安全和不可篡改了</strong></p>
+<p>如此说来，共识是如何产生的呢？回归到社会与数学，我们就会发现，这需要经历漫长的论证、教育和同化过程，时间长达千年之久，区块链中陌生节点间的共识达成过程也是如此，节点运行着一套标准的”共识协议“（<a href="https://krazymud.github.io/2018/10/21/pow/">POW协议</a>），节点间通过协议对新产生的数据进行独立的论证、记录和传播，每个节点都会对新数据进行一次完整的共识协议过程，而传播过程则是使用<a href="https://zhuanlan.zhihu.com/p/41228196">流言模型</a>层层扩散，其时间不会长达千年，但一次共识也需要持续10秒以上</p>
+<p>如果以太坊只是一方应用，那上述过程也许人们就忍了，但是，以太坊的定位是”世界计算机“，你能想象一台全世界人民共用的计算机，十秒才能做一次数据的批量录入的<a href="https://www.bihuoji.com/332103.html">场景</a>吗？</p>
+<p>
+  <img src="/img/2022-07-layer2/myGod.jpeg" alt="myGod">
+
+</p>
+<h1 id="是时候考虑扩容问题了">是时候考虑扩容问题了</h1>
+<p>所以，对以太坊性能的扩容问题一直都备受关注，并产生了大量的方案和实践项目，我们今天的主角layer2便是扩容方案之一</p>
+<p>在真正聊layer2之前，我还是先大致梳理一下几种扩容方案的概况，有了清晰的轮廓，才能对layer2解决的问题产生准确的理解，当然，如果你对其他扩容方案已经了解或不感兴趣，可以跳过阅读，后面的内容也能毫无压力</p>
+<p>说到系统扩容，无非就是强大自己和赋能别人，也就是：</p>
+<ul>
+<li>让自己的处理能力变好，也就是主链分片模式和共识机制优化</li>
+<li>让自己只处理核心事务，让别人处理周边事务，也就是链下处理、链上证明模式</li>
+</ul>
+<p>以太坊当前准备是双管齐下，在主链分片和共识机制优化的情况下，将实际业务剥离到链下进行处理，而链上做的是：</p>
+<ul>
+<li>数据的可信化背书：一个去中心化的信任机构，数据上链后，陌生双方都可依赖链上数据作为信任基础</li>
+<li>底层数据的存储标准化：一个现象级的数据存储标准，为陌生组织间的数据流动提供可能</li>
+</ul>
+<p>通过先驱们的不断实践，产生了大量优秀的实践项目，当然，这些落地项目也有着这样与那样的缺陷，让我们逐个大致了解一下：</p>
+<ul>
+<li><strong>主链分片模式</strong>：<a href="https://davidc.ai/2022/03/02/%E8%AF%91-%E4%BB%A5%E5%A4%AA%E5%9D%8A-2-0-%E4%BF%A1%E6%A0%87%E9%93%BE%E8%AF%A6%E8%A7%A3/">信标链</a>，将大量节点分片为64个处理单元</li>
+<li><strong>优化共识机制</strong>：从<a href="https://krazymud.github.io/2018/10/21/pow/">POW</a>转向<a href="https://www.bookfastpos.com/pos-system/guide-to-pos-system/">POS</a>，当然还有其他的共识协议<a href="https://zhuanlan.zhihu.com/p/440889195">可供参考</a></li>
+<li>以上，对主链的扩容方案，的确可以在一定程度上可以提高系统性能，但毕竟是有限的，就如同，在社会中，人们每次的交易都需要询问中央银行系统一样，中心化的服务提供机制，带来的必然是延迟与崩溃，所以，当前社会交易的主流模式是：中央银行背书，多种交易方式并存，例如：现金支付、支付宝支付和银联支付等等，在以太坊中的趋势亦是如此，以太坊主链作为去中心化的信任机构，为不同的链下机构作为信用背书和数据流通协议，实际的业务是在链下机构完成并流通的，这些链下机构便是下述的扩容方案</li>
+<li><strong>通道</strong>：<a href="https://simplefx.com/zh/bitcoin-lightning-network/">闪电网络</a>是其中之一，是一种点对点的链下处理方案，但使用场景有所限制，只能适用于熟人网络间的信息流动，对大量的陌生人间的数据流动没有提供直接支持</li>
+<li><strong>侧链</strong>：<a href="https://mirror.xyz/0x9B5b7b8290c23dD619ceaC1ebcCBad3661786f3a/q4FKPE8CwZQUmpnRLhYFvdAu8mTe2FR2qfqnmWm6RDw">plasma</a>是其中之一，解决了通道的场景限制，但其本质上脱离了主链的信用背书，是一条独立的区块链，只是与主链进行了有限的数据交互，这会让链上数据产生数据可用性问题（也就是，如何验证数据可以使用），又因其定位于特定场景下的应用，所以，其节点规模不足以达到主链的规模，也就无法具备应有的安全、不可篡改等特性</li>
+<li><strong>layer2</strong>：<a href="https://www.blocktempo.com/20210601-a-non-technical-introduction-to-rollups/">rollup</a>是其中之一，依赖的是layer（分层）的思想，将主链称为L1，而自己则是L2，通过将数据从L2 rollup（卷起来，可以理解为批量）到L1上，并使用L1为L2做信用背书的方式，解决了侧链的数据可用性问题和规模不足问题</li>
+</ul>
+<h1 id="layer2-能让我们变得更好">layer2 能让我们变得更好</h1>
+<p>由上述不难看出，链下扩容方案是以项目的形式一代一代的向生产级迈进的，layer2的rollup则是当前最合理的方案之一，这也十分符合软件工程思想：”没有什么问题是增加中间层解决不了的，如果有，那就加两层“（其实我想说，”没有什么是一顿火锅无法解决的，如果有，那就吃两顿“），当然，rollup是一种方案框架，要落地的话，我们还需要一些实际项目：</p>
+<ul>
+<li><a href="http://blog.hubwiz.com/2021/02/12/optimism-rollup/">optimistic-rollup</a>：正如其名，是一种乐观rollup方案，其认为大部分的L2到L1的数据提交都没有问题的，不需要花成本对其进行审查（注意，这里的成本是指L2的成本，不代表第三方的成本），只当有节点发起数据提交异议的时候，才使用仲裁和惩罚机制对异议进行处理，这像极了社会中，法院、诉讼与犯罪处理的过程</li>
+<li><a href="https://zombit.info/zk-rollups-navigating-zero-knowledge/">zk-rollup</a>：依赖于零知识证明算法的一种悲观rollup方案，其认为每笔交易都需要进行审查，并使用零知识证明算法[ref]，优雅的解决了审查中的性能、隐私等问题</li>
+</ul>
+<p>你可以通过zk-rollup的外联文章看到，zk-rollup似乎是一种”完美“的rollup解决方案，当然，是在不考虑任何成本的场景下，我十分同意<a href="https://www.defidaonews.com/article/6721798">Offchain Labs</a>的观点，因为通过观察人类社会就可以发现，成本是衡量社会运行机制合理性的重要考量因素之一，而经济学的经验也告诉我们，通过设计合理的举证和处罚机制，是可以以廉价的方式维持社会的正常运行的，zk-rollup也许可以做到万无一失，但其高昂的成本（运行和迁移），也许会将其适用场景限制在一些非成本敏感的场景中，而optimistic-rollup作为廉价的、更加社会化的方案，则可能会被应用在普适的场景中</p>
 
 
                 
@@ -386,7 +433,7 @@ $(function() {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/archive/" data-toggle="tooltip" data-placement="top" title="Posts Archive">&larr;
+                        <a href="/2022/07/16/layer2%E4%BB%8B%E7%BB%8D2/" data-toggle="tooltip" data-placement="top" title="从cannon的角度理解Layer2 - 2：cannon登场">&larr;
                             Previous Post</a>
                     </li>
                     

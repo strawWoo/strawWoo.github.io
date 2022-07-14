@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="" />
-    <meta property="og:title" content="" />
-    <meta property="twitter:title" content="" />
+    <meta name="title" content="从cannon的角度理解Layer2 - 2：cannon登场" />
+    <meta property="og:title" content="从cannon的角度理解Layer2 - 2：cannon登场" />
+    <meta property="twitter:title" content="从cannon的角度理解Layer2 - 2：cannon登场" />
     
 
     
-    <meta name="description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家">
-    <meta property="og:description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家" />
-    <meta property="twitter:description" content="稻草篮儿, 程序员, 开源爱好者, 生活探险家" />
+    <meta name="description" content="cannon是layer2在工程实践中，迭代出来的产物，让我们看看他有什么优势，又解决了什么问题">
+    <meta property="og:description" content="cannon是layer2在工程实践中，迭代出来的产物，让我们看看他有什么优势，又解决了什么问题" />
+    <meta property="twitter:description" content="cannon是layer2在工程实践中，迭代出来的产物，让我们看看他有什么优势，又解决了什么问题" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="稻草篮儿, StrawWoo, strawWoo, 稻草篮儿的网络日志, 稻草篮儿的博客, StrawWoo Blog, 博客, 个人网站, 区块链, 互联网, 微服务, Web3.0, 云原生, PaaS, Istio, Kubernetes">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>稻草篮儿的博客 | StrawWoo Blog</title>
+    <title>从cannon的角度理解Layer2 - 2：cannon登场 | 稻草篮儿的博客 | StrawWoo Blog</title>
 
-    <link rel="canonical" href="/about/">
+    <link rel="canonical" href="/2022/07/16/layer2%E4%BB%8B%E7%BB%8D2/">
 
     
     
@@ -150,7 +150,7 @@
 
 <style type="text/css">
     header.intro-header {
-        background-image: url('/img/home-bg.jpeg')
+        background-image: url('/img/2022-07-layer2/background.jpeg')
     }
 </style>
 
@@ -162,19 +162,23 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                        <a class="tag" href="/tags/layer2" title="layer2">
+                            layer2
+                        </a>
+                        
                     </div>
-                    <h1></h1>
+                    <h1>从cannon的角度理解Layer2 - 2：cannon登场</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         
                             Posted by 
                             
-                                    StrawWoo Blog
+                                陈开鸿
                              
                             on 
-                            Monday, January 1, 0001
+                            Thursday, July 14, 2022
                             
-                                <span id="/about/" class="leancloud_visitors meta_data_item" data-flag-title="">
+                                <span id="/2022/07/16/layer2%E4%BB%8B%E7%BB%8D2/" class="leancloud_visitors meta_data_item" data-flag-title="">
     <span class="post-meta-item-icon">
       <span class="octicon octicon-eye"></span> 
     </span>
@@ -332,11 +336,76 @@ $(function() {
                 post-container">
 
                 
-                <h2 id="关于我">关于我</h2>
-<blockquote>
-</blockquote>
-<p>Hi，我是陈开鸿，服务网格技术布道者及实践者，<a href="https://cloud.tencent.com/product/tcm">腾讯云</a>工程师，曾担任<a href="https://www.zte.com.cn/">中兴通讯</a>技术专家，Linux 基金会开源项目 <a href="https://www.onap.org/">ONAP</a> 项目 leader，甲骨文中间件高级顾问等。我创建了服务网格开源项目 <a href="https://aeraki.net">Aeraki Mesh</a>（CNCF Sandbox 项目），可以在 Istio 中管理 Dubbo、Thrift、Redis 以及任意私有协议的流量。</p>
-<p>工作联系： <a href="mailto:bearbearxinxiang@163.com">bearbearxinxiang@163.com</a></p>
+                <p>现在，让我们通过聚焦在Optimistic-Rollup的核心，也就是争议处理的部分，通过<a href="https://github.com/ethereum-optimism/cannon">cannon项目</a>来看看Optimistic-Rollup运行的大致过程，后面的内容会涉及繁琐的交互内容，如果你对这些细节不感兴趣，可以选择性跳过，有时抓大放小反而可能更加清晰明了</p>
+<h1 id="optimistic-rollup-cannon">Optimistic-rollup Cannon</h1>
+<p>cannon项目是optimistic-rollup方案中OVM2.0（Optimism虚拟机）的争议处理机制，相比于OVM1.0中的争议处理机制（下简称“<a href="https://medium.com/taipei-ethereum-meetup/optimistic-rollup-%E7%9A%84%E6%8C%91%E6%88%B0%E6%A9%9F%E5%88%B6-%E4%B8%80-optimism-ovm-1-0-2b6a8e9d64cd">OVM1.0</a>”），cannon具有以下特点，建议阅读OVM1.0的外联后，再继续阅读：</p>
+<ul>
+<li>易迁移：
+<ul>
+<li>在OVM1.0中，争议的仲裁是通过在L1上使用solidity模拟EVM字节码运行的方式（EVM-in-EVM），重跑L2上的智能合约，并得到最终结果而完成的，其问题在于模拟EVM的复杂性，以及，在L1上重跑时，为得到当时的运行时数据（想想，仲裁时的余额，和当时交易的余额一样吗？），L1是无法直接运行L2的智能合约的，而是需要对L2智能合约的字节码进行迁移改造后，才能迁移到L1上的，这些改造包括从特定内存读取数据快照等等</li>
+<li>在cannon中，仲裁过程避免了在EVM层面运行，而是将EVM的模拟交给了简化过的<a href="https://geth.ethereum.org/">Geth</a>（<a href="https://github.com/ethereum-optimism/minigeth/tree/c2b6152b4afb05e07514ad892304c117b2f72134">MiniGeth</a>）工具，并直接使用<a href="https://www.jianshu.com/p/ac2c9e7b1d8f?u_atoken=6dffa456-82e0-4198-a288-c152c373f598&amp;u_asession=01h_BjJljcJQLfOHhW7lhakByEQddriK7RPHlOpCH2fcGt-O_Vv1LZeUM8hkgjzVKyX0KNBwm7Lovlpxjd_P_q4JsKWYrT3W_NKPr8w6oU7K8DZ_ZZg4VBgniRksplNVT9yuYfe7vWV-zsHJifFo5DumBkFo3NEHBv0PZUm6pbxQU&amp;u_asig=05tHaCXnN_m0k5f1xXCnJ12URVFYhmYGgQBUUhDvyisusFgBOlyzFnmtOVMSaCQIo-kRhQif0vTyNV2Iq80Sc1wHqNjpsEBdG8ECDqB1qLMV2qo0ghSZLf1UiRZaN3Hi3XmypIeLXapAOyM9ot36CgWl2QnksE6citgRoz9BH0c5b9JS7q8ZD7Xtz2Ly-b0kmuyAKRFSVJkkdwVUnyHAIJzfkNUz3N9PUVC9M8tRByCw9blNx9C-6WwEs11ablDZzvfqft3yiexPr1Pj5ASov3mu3h9VXwMyh6PgyDIVSG1W8cnbGIK3WY73mwFga-LZdt-ISedmatB7kG9ICjY8RLQknoIuO5uar-BvXlivA6SEKtQIX4ihyWBew8RunLq4cXmWspDxyAEEo4kbsryBKb9Q&amp;u_aref=sGBj%2Bn1OIiihfyf74QRC8G%2BUGp0%3D">MIPS</a>的指令集和其内存快照进行，所以，对于用户而言，从L1迁移到L2的过程是无缝和平滑的</li>
+</ul>
+</li>
+<li>通用性：
+<ul>
+<li>由于cannon是依赖MIPS平台进行仲裁的，所以，理论上，cannon所支持的rollup方案，可以适用于任何有能力模拟MIPS指令的主链虚拟机</li>
+<li>由于cannon是使用MiniGeth工具对EVM进行模拟的，这本质上是对rollup方案与主链的解耦，一方面可以通过升级MiniGeth适应EVM的升级，另一方面可以将MIniGeth换成其他工具，以支持其他主链虚拟机实现rollup方案</li>
+</ul>
+</li>
+</ul>
+<h1 id="核心业务">核心业务</h1>
+<p>俗话说，一图胜千言，让我们画张图，看看cannon的核心过程，请注意，下面的内容仅包含对cannon的分析，仅为Optimistic-rollup方案的争议处理机制，其他过程并没有涉及</p>
+<p>
+  <img src="/img/2022-07-layer2/cannon_core.png" alt="cannon的业务架构图">
+
+</p>
+<p>从本质上讲，cannon的仲裁能力来源于：<strong>不同层以及不同节点之间，统一的CPU运行架构</strong>，也就是说，不管是在L1上，还是在L2上，都能以同一套CPU指令集（MIPS），在相同的内存快照中，得出严格相等运行结果，这样，就可以在受信的环境中通过重跑争议指令，从而得出受信的结果，并最终得出仲裁结论</p>
+<p>就如图中所描述的，当L2与L1同步内存快照后，L2与L1的运行内存就完全相同了，在正常情况下，L1（受信环境）通过智能合约模拟MIPS的指令集，模拟后的内存快照，与L2提供的内存快照应该是完全一致的，如果不一致的话，就可以证明L2提供的内存快照有作弊行为，应该使用处罚机制进行处理</p>
+<h1 id="流程中隐藏了很多细节">流程中隐藏了很多细节</h1>
+<p>当然，这里隐藏了很多运行的细节，让我们通过流程图将细节展开，看看cannon的运行过程</p>
+<p>
+  <img src="/img/2022-07-layer2/cannon_processing.png" alt="cannon的业务架构图">
+
+</p>
+<p>在开始流程之前，我们先来做一些前置说明：</p>
+<ul>
+<li>所有L2与L1的交互，都是以交易的形式完成的，也就是说，是可信并且不可篡改的</li>
+<li>Defender：是被质疑的一方，因为其提供的区块具有作弊的可能性</li>
+<li>Challenger：是发起质疑的一方，它发现Defender提供的区块Hash与自己计算出来的不一致</li>
+<li>Defender与Challenger其实也是L2的节点，图中单独画出来，仅仅是为了方便表达</li>
+<li>Defender与Challenger中的MIPS环境一般由模拟器提供，cannon中的默认模拟器为<a href="https://github.com/geohot/unicorn/tree/e5e1303243cf1a4e788a981ac7e6dbe945802260">unicorn</a></li>
+<li><a href="https://github.com/ethereum-optimism/minigeth/tree/c2b6152b4afb05e07514ad892304c117b2f72134">MiniGeth</a>：是<a href="https://geth.ethereum.org/">Geth</a>针对cannon进行裁剪后的精简版本</li>
+<li>内存快照：是以内存地址作为key，内存值做value，构建的<a href="https://learnblockchain.cn/books/geth/part3/mpt.html">MPT</a>数据结构，其主要用于支持模拟运行，以及通过RootHash，简化状态一致性的判断</li>
+</ul>
+<p>现在，让我们根据图中的流程，逐步梳理一下细节部分，下述的序号与图中序号一一对应：</p>
+<ol>
+<li>Challenger日常会检验区块的合法性，并希望可以通过发现非法区块得到挑战收益</li>
+<li>
+<ol>
+<li>通过计算和对比block header hash，Challenger发现了异常区块，它会马上将区块高度（blockNumber）送入MiniGeth，MiniGeth根据区块高度与L1或L2进行交互（L1还是L2取决于业务设计），并模拟blockNumber到blockNumber+1的所有过程，注意，MiniGeth与Geth的功能是一样的，并都与主链的运算结果严格一致</li>
+<li>就像你所知道的，所有应用的运行基础都是OS的操作码，所以，当MiniGeth在MIPS环境中，将状态从blockNumber推进到blockNumber+1后，MIPS的内存快照、操作码数量、内存快照RootHash、可能的争议步骤序号（step）等数据，就会通过回调的形式流回到Challenger中（回调方式在代发分析中会有详细介绍）</li>
+<li>Challenger将MIPS内存以及block的相关数据，打包到挑战请求中，以交易的形式调用L1的智能合约，智能合约则会在storage中生成challengerId以及相关数据结构，以支持后续的挑战过程</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>Defender得知自己打包的blockNumber被挑战后（如何得知可以自由设计），需要到L1的智能合约中获取挑战的上下文，包括challengerId、blockNumber、step（当前争议的MIPS操作码）等</li>
+<li>Defender根据blockNumber和step，使用MiniGeth进行按步模拟，并输出step那一步执行完毕后的MIPS内存数组</li>
+<li>将MIPS内存MPT化（内存快照），并得出RootHash</li>
+<li>将MIPS内存快照的Root Hash提交到L1的智能合约</li>
+</ol>
+</li>
+<li>Challenger与Defender的攻与防是来回多次的（也就是3与4过程是多次运行的），Challenger也通过与Defender相同的步骤，向L1智能合约持续提供新step的RootHash，这也是为什么cannon被称为“交互式仲裁机制”的原因，你可以想象一条由几千万个整数组成的数轴（如：[0,1,2&hellip;85619095]），其中每个整数都对应着一个MIPS操作码，而数组的顺序就是MIPS操作码运行的顺序，Challenger与Defender的攻防过程，其实，就是需要在这条数轴中寻找到那个真正有争议的操作码，也就是，该操作码在Challenger与Defender各自的MIPS中运行后，得出了不相等的结果，这个操作码被称为“确定的争议步骤”，当然，这个寻找的过程，cannon使用的二分查找的模式，具有O(logn)的性能</li>
+<li>
+<ol>
+<li>当“确定的争议步骤”被找出后，Challenger/Defender需要通过MiniGeth得到步骤运行前的MIPS内存快照，可以简称为“前内存快照”</li>
+<li>通过向L1智能合约提供challengerId，以及前内存快照，Challenger发起了仲裁过程</li>
+<li>L1智能合约（受信环境）使用前内存快照，将step推进到step+1，并得到后内存快照的RootHash，这里需要注意一下，L1的智能合约是怎样知道step+1的操作码的呢？那是因为，所有数据其实都存在于前内存快照中，例如：pc地址、操作码地址等等</li>
+<li>L1的智能合约通过运算，得出了可信的step+1的RootHash，现在，只需要将这个RootHash与Challenger/Defender“攻防阶段”已经提供了的step+1的RootHash进行对比，就可以知道Defender是否有作弊行为了，并可以判断是否需要运行惩罚的过程</li>
+</ol>
+</li>
+</ol>
+<p>以上，我们通过一个实际例子梳理了cannon的运行过程，更细节的部分，之后我们会使用代码的形式进行详细了解</p>
 
 
                 
@@ -386,10 +455,15 @@ $(function() {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/archive/" data-toggle="tooltip" data-placement="top" title="Posts Archive">&larr;
+                        <a href="/2022/07/18/layer2%E4%BB%8B%E7%BB%8D2/" data-toggle="tooltip" data-placement="top" title="从cannon的角度理解Layer2 - 3：代码才是最好的老师">&larr;
                             Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/2022/07/14/layer2%E4%BB%8B%E7%BB%8D1/" data-toggle="tooltip" data-placement="top" title="从cannon的角度理解Layer2 - 1：前世今生">Next
+                            Post &rarr;</a>
+                    </li>
                     
                 </ul>
                 
