@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>BlockChain on StrawWoo Blog</title>
+    <link>https://strawwoo.github.io/categories/blockchain/</link>
+    <description>Recent content in BlockChain on StrawWoo Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 14 Jul 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://strawwoo.github.io/categories/blockchain/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>从cannon的角度理解Layer2：前世今生</title>
+      <link>https://strawwoo.github.io/2022/07/14/layer2%E4%BB%8B%E7%BB%8D/</link>
+      <pubDate>Thu, 14 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://strawwoo.github.io/2022/07/14/layer2%E4%BB%8B%E7%BB%8D/</guid>
+      <description>今天我们来聊聊区块链的layer2，并通过一个实际的项目（cannon），从一个特定角度，看看为什么需要layer2，以及layer2都干了</description>
+    </item>
+    
+  </channel>
+</rss>
